@@ -1,0 +1,8 @@
+name: StaticMap
+version: '${project.version}'
+main: com.molean.staticmap.StaticMap
+api-version: 1.18
+permissions:
+  staticmap.use:
+    description: Allows build static map
+    default: true
