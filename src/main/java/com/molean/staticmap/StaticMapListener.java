@@ -45,13 +45,17 @@ public class StaticMapListener implements Listener {
         if (!item.getType().equals(Material.FILLED_MAP)) {
             return;
         }
-        String colors = NMSTagUtils.get(item, "static-map");
-        if (colors != null && !colors.isEmpty()) {
-            ItemMeta itemMeta = item.getItemMeta();
-            MapUtils.updateStaticMap(colors, (MapMeta) itemMeta);
-            item.setItemMeta(itemMeta);
-            itemFrame.setItem(item);
+        ;
+        if (PDHSimplified.of(item.getItemMeta()).has("colors")) {
+            byte[] bytes = PDHSimplified.of(item.getItemMeta()).getAsBytes("colors");
+            if (bytes != null) {
+                ItemMeta itemMeta = item.getItemMeta();
+                MapUtils.updateStaticMap(bytes, (MapMeta) itemMeta);
+                item.setItemMeta(itemMeta);
+                itemFrame.setItem(item);
+            }
         }
+
     }
 
     @EventHandler
@@ -61,7 +65,7 @@ public class StaticMapListener implements Listener {
             if (!itemStack.getType().equals(Material.FILLED_MAP)) {
                 return;
             }
-            String colors = NMSTagUtils.get(itemStack, "static-map");
+            byte[] colors = PDHSimplified.of(itemStack.getItemMeta()).getAsBytes("colors");
             ItemMeta itemMeta = itemStack.getItemMeta();
             MapUtils.updateStaticMap(colors, (MapMeta) itemMeta);
             itemStack.setItemMeta(itemMeta);
@@ -75,7 +79,7 @@ public class StaticMapListener implements Listener {
         if (itemStack == null || !itemStack.getType().equals(Material.FILLED_MAP)) {
             return;
         }
-        String colors = NMSTagUtils.get(itemStack, "static-map");
+        byte[] colors = PDHSimplified.of(itemStack.getItemMeta()).getAsBytes("colors");
         ItemMeta itemMeta = itemStack.getItemMeta();
         MapUtils.updateStaticMap(colors, (MapMeta) itemMeta);
         itemStack.setItemMeta(itemMeta);
@@ -97,21 +101,21 @@ public class StaticMapListener implements Listener {
             return;
         }
 
-        if (NMSTagUtils.get(firstItem, "static-map") != null) {
+        if (PDHSimplified.of(firstItem.getItemMeta()).has("colors")) {
             return;
         }
         ItemStack itemStack = new ItemStack(Material.FILLED_MAP);
         MapMeta mapMeta = (MapMeta) firstItem.getItemMeta();
-        String colors = MapUtils.getColors(mapMeta);
+        byte[] colors = MapUtils.getColors(mapMeta);
         ItemMeta itemMeta = itemStack.getItemMeta();
         String renameText = event.getInventory().getRenameText();
         if (renameText != null && !renameText.isEmpty()) {
             itemMeta.displayName(Component.text(Objects.requireNonNull(event.getInventory().getRenameText())));
         }
         itemMeta.lore(List.of(Component.text(lore)));
+        PDHSimplified.of(itemMeta).setBytes("colors", colors);
         itemStack.setItemMeta(itemMeta);
-        assert colors != null;
-        itemStack = NMSTagUtils.set(itemStack, "static-map", colors);
+        itemStack.setAmount(firstItem.getAmount());
         event.getInventory().setRepairCost(cost);
         event.setResult(itemStack);
     }
